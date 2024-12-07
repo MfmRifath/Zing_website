@@ -1,0 +1,16 @@
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Match all documents in the database
+    match /{document=**} {
+      // Allow everyone to read and write
+      allow read, write: if true;
+    }
+    match /users/{userId} {
+      allow read, write: if request.auth != null; // Example rule
+    }
+  match /users/{userId} {
+      allow delete: if request.auth != null;
+    }
+}
+ 
+}
