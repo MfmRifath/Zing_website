@@ -3,9 +3,16 @@ import { motion } from "framer-motion";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
+// Define the type for user details
+type UserDetails = {
+  name?: string;
+  role?: string;
+  email?: string;
+};
+
 const Home: React.FC = () => {
   const [loading, setLoading] = useState(true); // State for loading
-  const [userDetails, setUserDetails] = useState<any>(null); // State for user details
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null); // State for user details
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -20,7 +27,7 @@ const Home: React.FC = () => {
           const userDoc = await getDoc(userDocRef);
 
           if (userDoc.exists()) {
-            setUserDetails(userDoc.data());
+            setUserDetails(userDoc.data() as UserDetails);
           } else {
             console.error("No user document found.");
           }

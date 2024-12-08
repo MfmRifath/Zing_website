@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "../firebase"; // Ensure Firebase Auth is correctly configured
 import { getFirestore, doc, getDoc } from "firebase/firestore"; // Import Firestore methods
 
 const db = getFirestore(); // Initialize Firestore
 
+type UserDetails = {
+  fullName?: string;
+  role?: string;
+  // Add other fields as needed
+};
+
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [userDetails, setUserDetails] = useState<any>(null);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
 
   // Function to handle login
   const handleLogin = async (e: React.FormEvent) => {
@@ -17,8 +23,10 @@ const Login: React.FC = () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       alert("Login successful!");
-    } catch (error: any) {
-      alert(`Login failed! ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(`Login failed! ${error.message}`);
+      }
     }
   };
 
@@ -28,7 +36,7 @@ const Login: React.FC = () => {
       const userDocRef = doc(db, "users", uid);
       const userDoc = await getDoc(userDocRef);
       if (userDoc.exists()) {
-        setUserDetails(userDoc.data());
+        setUserDetails(userDoc.data() as UserDetails);
       } else {
         console.error("No such document found!");
       }

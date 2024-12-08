@@ -4,11 +4,17 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { getFirestore, doc, onSnapshot } from "firebase/firestore";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
+// Define the type for user details
+type UserDetails = {
+  name?: string;
+  role?: string;
+};
+
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userDetails, setUserDetails] = useState<any>(null); // Store user details
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
-  const [loading, setLoading] = useState(true); // Loading state
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null); // Typed userDetails state
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
 
   const toggleMenu = () => {
@@ -25,7 +31,7 @@ const Navbar: React.FC = () => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         setIsLoggedIn(true);
-        setLoading(true); // Start loading
+        setLoading(true);
 
         // Set up a Firestore listener for the user's document
         const userDocRef = doc(db, "users", currentUser.uid);
@@ -33,22 +39,22 @@ const Navbar: React.FC = () => {
           userDocRef,
           (docSnapshot) => {
             if (docSnapshot.exists()) {
-              setUserDetails(docSnapshot.data());
+              setUserDetails(docSnapshot.data() as UserDetails);
             } else {
               setUserDetails(null);
               console.error("User document does not exist!");
             }
-            setLoading(false); // Stop loading after updates
+            setLoading(false);
           },
           (error) => {
             console.error("Error listening to Firestore:", error);
-            setLoading(false); // Stop loading even if there's an error
+            setLoading(false);
           }
         );
       } else {
         setIsLoggedIn(false);
         setUserDetails(null);
-        setLoading(false); // Stop loading if no user
+        setLoading(false);
         if (unsubscribeFirestore) unsubscribeFirestore();
       }
     });
@@ -60,13 +66,12 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
-  // Log Out Functionality
   const handleLogout = async () => {
     const auth = getAuth();
     try {
       await signOut(auth);
-      setIsLoggedIn(false); // Reset login state
-      setUserDetails(null); // Clear user details
+      setIsLoggedIn(false);
+      setUserDetails(null);
       alert("You have been logged out.");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -74,15 +79,14 @@ const Navbar: React.FC = () => {
   };
 
   if (loading) {
-    // Show loading spinner while fetching user details
     return (
       <div className="flex flex-col justify-center items-center h-screen bg-gray-50">
-  <div className="relative">
-    <div className="w-16 h-16 border-4 border-blue-500 border-solid rounded-full animate-spin"></div>
-    <div className="absolute top-0 left-0 w-16 h-16 border-4 border-dashed border-transparent rounded-full border-t-blue-300 border-b-blue-700 animate-spin-slow"></div>
-  </div>
-  <p className="mt-4 text-lg font-semibold text-gray-600">Loading...</p>
-</div>
+        <div className="relative">
+          <div className="w-16 h-16 border-4 border-blue-500 border-solid rounded-full animate-spin"></div>
+          <div className="absolute top-0 left-0 w-16 h-16 border-4 border-dashed border-transparent rounded-full border-t-blue-300 border-b-blue-700 animate-spin-slow"></div>
+        </div>
+        <p className="mt-4 text-lg font-semibold text-gray-600">Loading...</p>
+      </div>
     );
   }
 

@@ -1,5 +1,11 @@
 {
   "projects": {
     "default": "zing-cb51c"
+  },
+  "targets": {},
+  "etags": {
+    "zing-cb51c": {
+      "extensionInstances": {}
+    }
   }
 }

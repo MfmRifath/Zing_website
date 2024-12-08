@@ -3,8 +3,16 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import ShopCard from "../components/ShopCart";
 import { useNavigate } from "react-router-dom";
 
+// Define the Shop type
+type Shop = {
+  id: string;
+  name: string;
+  description: string;
+  imageUrl: string;
+};
+
 const ShopList: React.FC = () => {
-  const [shops, setShops] = useState<any[]>([]);
+  const [shops, setShops] = useState<Shop[]>([]); // Updated type
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -12,9 +20,9 @@ const ShopList: React.FC = () => {
       try {
         const db = getFirestore();
         const querySnapshot = await getDocs(collection(db, "stores"));
-        const shopList = querySnapshot.docs.map((doc) => ({
+        const shopList: Shop[] = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data(),
+          ...(doc.data() as Omit<Shop, "id">), // Map Firestore data to Shop type
         }));
         setShops(shopList);
       } catch (error) {
